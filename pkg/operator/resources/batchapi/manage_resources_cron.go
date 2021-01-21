@@ -269,7 +269,7 @@ func reconcileInProgressJob(jobState *JobState, queueURL *string, k8sJob *kbatch
 
 func checkIfJobCompleted(jobKey spec.JobKey, queueURL string, k8sJob *kbatch.Job) error {
 	if int(k8sJob.Status.Failed) > 0 {
-		return investigateJobFailure(jobKey, k8sJob)
+		return investigateJobFailure(jobKey)
 	}
 
 	queueMessages, err := getQueueMetricsFromURL(queueURL)
@@ -293,7 +293,7 @@ func checkIfJobCompleted(jobKey spec.JobKey, queueURL string, k8sJob *kbatch.Job
 		return nil
 	}
 
-	batchMetrics, err := getRealTimeBatchMetrics(jobKey)
+	batchMetrics, err := getBatchMetrics(jobKey)
 	if err != nil {
 		return err
 	}
@@ -328,7 +328,7 @@ func checkIfJobCompleted(jobKey spec.JobKey, queueURL string, k8sJob *kbatch.Job
 	return nil
 }
 
-func investigateJobFailure(jobKey spec.JobKey, k8sJob *kbatch.Job) error {
+func investigateJobFailure(jobKey spec.JobKey) error {
 	reasonFound := false
 
 	pods, _ := config.K8s.ListPodsByLabel("jobID", jobKey.ID)
